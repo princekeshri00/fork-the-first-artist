@@ -1,0 +1,26 @@
+{
+  "name": "@oso/payments",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "x402 on Hedera: paywall for artist pages, pay-per-call inference meter, 96.31/3.69 split, HCS spend log",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/server.ts",
+    "dev": "node --watch src/server.ts",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "token:create": "node scripts/create-tip-token.ts"
+  },
+  "optionalDependencies": {
+    "@hiero-ledger/sdk": "2.90.1",
+    "@x402/core": "2.30.0",
+    "@x402/hedera": "2.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  }
+}

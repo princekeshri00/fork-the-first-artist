@@ -1,5 +1,13 @@
+# real secrets never leave the machine
 .env
 .env.*
+# ...but the templates must ship, or nobody can run this
+!.env.example
 node_modules/
 *.key
 *.pem
+
+# runtime ledgers (spend + budget) are state, not source
+payments/data/*.jsonl
+agent/data/*.jsonl
+*.log

@@ -1,0 +1,143 @@
+{
+  "$comment": "Provider registry for the steward agent. Choice of provider/model is data; code never names a vendor. Copy to providers.json (gitignored only if it contains secrets — it must not: secrets go in .env, referenced by envKey).",
+  "version": 1,
+
+  "default": "0g",
+  "rail": "hedera",
+
+  "fallback": {
+    "enabled": false,
+    "$comment": "Off in the demo. 0G must be the only inference path on stage. When enabled it is explicit, never silent: the envelope carries degradation: 'cheaper-model'.",
+    "chain": ["0g:0gm-1.0-35b-a3b", "0g:deepseek-v4-flash"]
+  },
+
+  "providers": {
+    "0g": {
+      "kind": "inference",
+      "label": "0G Private Computer (TEE)",
+      "sdk": "openai",
+      "baseUrl": "https://router-api.0g.ai/v1",
+      "baseUrlTestnet": "https://router-api-testnet.integratenetwork.work/v1",
+      "envKey": "ZEROG_API_KEY",
+      "defaultModel": "0gm-1.0-35b-a3b",
+      "modelCatalog": "/models",
+      "transport": "x402-meter",
+      "$transport": "x402-meter | direct. Meter = pay-per-call proxy so the steward pays for its own inference (see docs/AGENT-IDEATION.md §2).",
+      "headers": {
+        "X-0G-Provider-Trust-Mode": "verified"
+      },
+      "extensions": {
+        "verify_tee": true
+      },
+      "provenance": {
+        "requestIdPath": "x_0g_trace.request_id",
+        "teeVerifiedPath": "x_0g_trace.tee_verified",
+        "costPath": "x_0g_trace.billing.total_cost"
+      },
+      "capabilities": ["tools", "json", "stream"],
+      "priceFallbackUsdPerMTok": { "input": 0.2, "output": 0.8 }
+    },
+
+    "openai": {
+      "kind": "inference",
+      "label": "OpenAI",
+      "sdk": "openai",
+      "baseUrl": "https://api.openai.com/v1",
+      "envKey": "OPENAI_API_KEY",
+      "defaultModel": "gpt-4o-mini",
+      "modelCatalog": "/models",
+      "transport": "direct",
+      "capabilities": ["tools", "json", "vision", "stream"],
+      "devOnly": true
+    },
+
+    "anthropic": {
+      "kind": "inference",
+      "label": "Anthropic",
+      "sdk": "anthropic",
+      "baseUrl": "https://api.anthropic.com",
+      "envKey": "ANTHROPIC_API_KEY",
+      "defaultModel": "claude-sonnet-4-5",
+      "transport": "direct",
+      "shape": {
+        "$comment": "Adapter normalizes these differences: system is top-level, content is a block array, tool results are tool_result blocks.",
+        "systemIsTopLevel": true,
+        "contentBlocks": true,
+        "jsonMode": "tool-forcing"
+      },
+      "capabilities": ["tools", "vision", "stream"],
+      "devOnly": true
+    },
+
+    "gemini": {
+      "kind": "inference",
+      "label": "Google Gemini",
+      "sdk": "@google/genai",
+      "baseUrl": "https://generativelanguage.googleapis.com",
+      "envKey": "GEMINI_API_KEY",
+      "defaultModel": "gemini-2.5-flash",
+      "transport": "direct",
+      "shape": {
+        "jsonMode": "responseSchema",
+        "toolSchema": "google-function-declarations"
+      },
+      "capabilities": ["tools", "json", "vision", "stream"],
+      "devOnly": true
+    },
+
+    "local": {
+      "kind": "inference",
+      "label": "Local (ollama / vLLM)",
+      "sdk": "openai",
+      "baseUrl": "http://localhost:11434/v1",
+      "envKey": null,
+      "defaultModel": "qwen2.5:7b-instruct",
+      "transport": "direct",
+      "capabilities": ["json"],
+      "devOnly": true
+    },
+
+    "hedera": {
+      "kind": "rail",
+      "$comment": "NOT a model provider. Hedera is the money + audit rail: x402 settlement, HCS spend log, HTS custom-fee split. It contributes tools into the same registry the model calls.",
+      "label": "Hedera testnet",
+      "network": "hedera:testnet",
+      "facilitator": "https://x402.org/facilitator",
+      "asset": { "id": "0.0.6001", "symbol": "USDC", "decimals": 6 },
+      "accounts": {
+        "artist": "HEDERA_ARTIST_ACCOUNT_ID",
+        "agentCompute": "HEDERA_AGENT_ACCOUNT_ID"
+      },
+      "envKey": "HEDERA_AGENT_PRIVATE_KEY",
+      "split": { "artist": 0.9631, "agent": 0.0369 },
+      "hcs": {
+        "spendTopicEnv": "HCS_SPEND_TOPIC_ID",
+        "claimTopicEnv": "HCS_CLAIM_TOPIC_ID"
+      },
+      "tools": ["quote_tip", "pay_x402", "hcs_log", "hedera_balance"]
+    }
+  },
+
+  "tools": {
+    "get_artist_profile": { "side": "read", "source": "ens+local" },
+    "get_songs": { "side": "read", "source": "ens+local" },
+    "quote_tip": { "side": "rail", "provider": "hedera" },
+    "pay_x402": { "side": "rail", "provider": "hedera", "capChecked": true },
+    "hcs_log": { "side": "rail", "provider": "hedera" },
+    "metered_inference": { "side": "rail", "provider": "hedera", "upstream": "0g" }
+  },
+
+  "budget": {
+    "$comment": "Caps gate the QUOTE, before payment (payment is collected before inference). See §6.",
+    "maxUsdPerRequest": 0.002,
+    "maxUsdPerHour": 0.05,
+    "maxUsdTotal": 5.0,
+    "degradation": ["cheaper-model", "shorter-max-tokens", "template-reply"]
+  },
+
+  "generation": {
+    "temperature": 0.4,
+    "maxTokens": 400,
+    "maxToolTurns": 4
+  }
+}

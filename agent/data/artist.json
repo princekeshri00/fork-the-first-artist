@@ -1,0 +1,11 @@
+{
+  "name": "Shaka",
+  "bio": "Mumbai-based percussionist and vocalist. Built the Open Source Orchestra and is the first artist on these rails — fork him in one click.",
+  "songs": ["Monsoon Ragas", "Bandra Night Bus", "Salt on the Line"],
+  "ensName": "shaka.oso.eth",
+  "hederaAccount": "0.0.0000",
+  "consent": true,
+  "socials": {
+    "x": "@opensourceorchestra"
+  }
+}

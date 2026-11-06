@@ -1,0 +1,16 @@
+{
+  "name": "fork-the-first-artist",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Open Source Orchestra — artist ENS names, x402 rails on Hedera, steward agents on 0G",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "install:all": "npm --prefix payments install && npm --prefix agent install",
+    "test": "npm --prefix payments test && npm --prefix agent test",
+    "typecheck": "npm --prefix payments run typecheck && npm --prefix agent run typecheck",
+    "dev:payments": "npm --prefix payments start",
+    "dev:agent": "npm --prefix agent start",
+    "demo": "node agent/scripts/demo.ts",
+    "smoke": "node agent/scripts/smoke.ts"
+  }
+}

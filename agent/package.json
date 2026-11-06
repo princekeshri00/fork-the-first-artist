@@ -1,0 +1,27 @@
+{
+  "name": "@oso/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Artist steward agent: provider-agnostic interface, 0G default, spend cap, x402-paid inference",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/server.ts",
+    "dev": "node --watch src/server.ts",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.ts",
+    "demo": "node scripts/demo.ts"
+  },
+  "optionalDependencies": {
+    "@hiero-ledger/sdk": "2.90.1",
+    "@x402/core": "2.30.0",
+    "@x402/hedera": "2.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  }
+}

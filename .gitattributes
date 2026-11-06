@@ -1,0 +1,2 @@
+# keep line endings stable for a mixed Windows/macOS team
+* text=auto eol=lf
