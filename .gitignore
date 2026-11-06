@@ -3,3 +3,8 @@
 node_modules/
 *.key
 *.pem
+
+.env
+venv/
+.venv/
+__pycache__/
